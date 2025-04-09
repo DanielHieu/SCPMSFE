@@ -285,6 +285,7 @@ export default function Dashboard() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tầng</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian vào</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -295,8 +296,9 @@ export default function Dashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.floorName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.parkingSpaceName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(car.checkInTime).toLocaleString('vi-VN')}
+                      {car.checkInTime}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.rentalType}</td>
                   </tr>
                 ))}
               </tbody>

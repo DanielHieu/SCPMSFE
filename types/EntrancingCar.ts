@@ -5,4 +5,5 @@ export interface EntrancingCar {
     floorName: string;
     parkingSpaceName: string;
     checkInTime: string;
+    rentalType: string;
 }
