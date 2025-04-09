@@ -148,7 +148,7 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Link href="/contracts" className="block h-full">
+          <Link href="/tasks" className="block h-full">
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-6 border border-purple-200 h-full hover:shadow-md transition-all duration-200 group">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-purple-100 p-2 rounded-lg group-hover:bg-purple-200 transition-colors">
@@ -156,8 +156,8 @@ export default function Dashboard() {
                 </div>
                 <span className="text-xs font-medium py-1 px-2 rounded-full bg-purple-100 text-purple-800">Manage</span>
               </div>
-              <h2 className="text-xl font-semibold mb-2 text-purple-900">Quản lý hợp đồng</h2>
-              <p className="text-purple-700">Xem và quản lý hợp đồng</p>
+              <h2 className="text-xl font-semibold mb-2 text-purple-900">Quản lý công việc</h2>
+              <p className="text-purple-700">Xem và quản lý công việc</p>
             </div>
           </Link>
         </motion.div>

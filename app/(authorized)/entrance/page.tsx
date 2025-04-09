@@ -18,7 +18,7 @@ export default function EntrancePage() {
     const [contract, setContract] = useState<Contract | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { parkingLotFull, error } = useCurrentParkingLot();
+    const { parkingLotFull, error, fetchParkingLotFull } = useCurrentParkingLot();
     const { addNotification } = useNotification();
 
     const walkinAreas = useMemo(() => parkingLotFull?.areas && parkingLotFull.areas
@@ -142,10 +142,14 @@ export default function EntrancePage() {
             });
 
             if (response.ok) {
+                fetchParkingLotFull();
+
                 addNotification("Xe đã vào bãi thành công", "success");
+
                 resetForm();
             } else {
-                addNotification("Lỗi khi vào bãi", "error");
+                const errorData = await response.json();
+                addNotification(errorData.message || "Lỗi khi vào bãi", "error");
             }
         } catch (error) {
             console.error("Error handling entrance:", error);

@@ -14,20 +14,29 @@ export const useCurrentParkingLot = () => {
     const [parkingLotFull, setParkingLotFull] = useState<ParkingLotFull | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const fetchParkingLotFull = () => {
+        fetch(process.env.NEXT_PUBLIC_API_LOCAL_URL + "/api/parking-lot/full",
+            {
+                cache: "no-store"
+            }
+        )
+            .then(res => res.json())
+            .then(data => {
+                setParkingLotFull(data.data);
+            })
+            .catch(err => {
+                setError(err.message);
+            });
+    }
+
+
     useEffect(() => {
         if (parkingLotFull) return;
 
         if (session?.user) {
-            fetch(process.env.NEXT_PUBLIC_API_LOCAL_URL + "/api/parking-lot/full")
-                .then(res => res.json())
-                .then(data => {
-                    setParkingLotFull(data.data);
-                })
-                .catch(err => {
-                    setError(err.message);
-                });
+            fetchParkingLotFull();
         }
     }, [session, parkingLotFull]);
 
-    return { parkingLotFull, error };
+    return { parkingLotFull, error, fetchParkingLotFull };
 }
