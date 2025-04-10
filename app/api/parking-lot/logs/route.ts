@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { apiFetch } from '@/lib/utils/api';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         // Get the session to retrieve the parking lot ID
         const session = await getServerSession(authOptions);
