@@ -38,6 +38,9 @@ const Header = () => {
             <Link href="/exit" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">
               Xe ra bãi
             </Link>
+            <Link href="/statistics" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">
+              Thống kê
+            </Link>
           </nav>
         </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function GET(request: NextRequest) {
     try {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Call the API to pay the fee
-        const response = await fetch(`${process.env.API_URL}/api/EntryExitLog/pay/${entryExitId}`, {
+        const response = await apiFetch(`/api/EntryExitLog/pay/${entryExitId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

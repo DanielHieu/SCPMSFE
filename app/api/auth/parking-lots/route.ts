@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function GET() {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -7,10 +8,10 @@ export async function GET() {
         console.log('[API] GET /api/parking-lot - Request received');
 
         // Make request to the external API
-        const apiUrl = `${process.env.API_URL}/api/parkinglot/search`;
+        const apiUrl = `/api/parkinglot/search`;
         console.log(`[API] Calling external API: ${apiUrl}`);
 
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

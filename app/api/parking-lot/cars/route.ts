@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 import { EntrancingCar } from "@/types/EntrancingCar";
+import { apiFetch } from "@/lib/utils/api";
 
 export async function GET() {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -23,7 +24,7 @@ export async function GET() {
         const parkingLotId = session.user.parkingLot?.parkingLotId;
         console.log('[API] Parking lot ID:', parkingLotId);
         // Get all cars currently in the parking lot (with check-in but no check-out)
-        const response = await fetch(process.env.API_URL + "/api/EntryExitLog/GetEntrancingCars/" + parkingLotId);
+        const response = await apiFetch("/api/EntryExitLog/GetEntrancingCars/" + parkingLotId);
         const data = await response.json();
 
         console.log('[API] Data:', JSON.stringify(data, null, 2));

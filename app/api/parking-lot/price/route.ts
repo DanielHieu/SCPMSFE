@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/authOptions';
 import { ParkingLotPrice } from '@/lib/hook/useParkingLotPrice';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function GET() {
     try {
@@ -30,10 +31,10 @@ export async function GET() {
         console.log(`[API] Processing request for parking lot ID: ${parkingLotId}`);
 
         // Make request to the external API
-        const requestUrl = process.env.API_URL + '/api/parkinglot/getById?id=' + parkingLotId;
+        const requestUrl = '/api/parkinglot/getById?id=' + parkingLotId;
         console.log(`[API] Fetching data from external API: ${requestUrl}`);
 
-        const response = await fetch(requestUrl, {
+        const response = await apiFetch(requestUrl, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

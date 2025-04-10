@@ -1,5 +1,6 @@
 import { RentalType } from '@/types/RentalType';
 import { NextResponse } from 'next/server';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function POST(request: Request) {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -20,10 +21,10 @@ export async function POST(request: Request) {
         }
 
         // Make request to the external API
-        const apiUrl = `${process.env.API_URL}/api/entryexitlog/add`;
+        const apiUrl = `/api/entryexitlog/add`;
         console.log(`[API] Calling external API: ${apiUrl}`);
 
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

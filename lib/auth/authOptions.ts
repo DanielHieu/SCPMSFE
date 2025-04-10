@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "@/lib/auth/User";
 import { ParkingLot } from "@/types/ParkingLot";
+import { apiFetch } from "@/lib/utils/api";
 
 declare module "next-auth" {
     interface Session {
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
                     const nParkingLotId = Number(parkingLotId);
                     
                     // TODO: Implement your actual authentication logic here
-                    const response = await fetch(process.env.API_URL + "/api/staff/authorize", {
+                    const response = await apiFetch("/api/staff/authorize", {
                         method: "POST",
                         body: JSON.stringify({ username, password, parkingLotId: nParkingLotId }),
                         headers: {

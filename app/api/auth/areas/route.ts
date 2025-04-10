@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function GET(request: Request) {
     try {
@@ -16,10 +17,10 @@ export async function GET(request: Request) {
         }
 
         // Make request to the external API
-        const apiUrl = `${process.env.API_URL}/api/area/getareasbyparkinglot?parkingLotId=${parkingLotId}`;
+        const apiUrl = `/api/area/getareasbyparkinglot?parkingLotId=${parkingLotId}`;
         console.log(`[API] Calling external API: ${apiUrl}`);
 
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

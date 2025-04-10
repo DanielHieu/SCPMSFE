@@ -11,7 +11,7 @@ export default function Dashboard() {
   const [carsInParkingLot, setCarsInParkingLot] = useState<EntrancingCar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [stats ] = useState({
+  const [stats] = useState({
     totalSpaces: 200,
     occupiedSpaces: 150,
     revenueToday: 2450000,
@@ -298,7 +298,7 @@ export default function Dashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {car.checkInTime}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.rentalType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.rentalType == "Walkin" ? "Vãng lai" : "Hợp đồng"}</td>
                   </tr>
                 ))}
               </tbody>

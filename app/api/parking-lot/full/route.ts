@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/authOptions';
+import { apiFetch } from '@/lib/utils/api';
 
 export async function GET() {
     try {
@@ -33,11 +34,11 @@ export async function GET() {
         }
 
         // Make request to the external API
-        const apiUrl = `${process.env.API_URL}/api/parkinglot/${parkingLotId}/full`;
+        const apiUrl = `/api/parkinglot/${parkingLotId}/full`;
         console.log(`[API] Calling external API: ${apiUrl}`);
         const startTime = Date.now();
 
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

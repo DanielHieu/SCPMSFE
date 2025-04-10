@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
+import { apiFetch } from "@/lib/utils/api";
 
 export async function GET(request: NextRequest) {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -45,10 +46,10 @@ export async function GET(request: NextRequest) {
         console.log(`[API] Preparing request to external API with data:`, JSON.stringify(requestData, null, 2));
 
         // Call API to calculate fee
-        const apiUrl = `${process.env.API_URL}/api/entryExitLog/calculateFee`;
+        const apiUrl = `/api/entryExitLog/calculateFee`;
         console.log(`[API] Calling external API: ${apiUrl}`);
 
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
