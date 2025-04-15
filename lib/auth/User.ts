@@ -13,6 +13,7 @@ export interface User extends DefaultUser {
     role?: string;
     parkingLot?: ParkingLot;
     permissions?: string[];
+    username?: string;
 }
 
 /**

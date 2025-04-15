@@ -9,6 +9,7 @@ export async function GET() {
 
         // Make request to the external API
         const apiUrl = `/api/parkinglot/search`;
+        
         console.log(`[API] Calling external API: ${apiUrl}`);
 
         const response = await apiFetch(apiUrl, {
@@ -40,6 +41,7 @@ export async function GET() {
 
     } catch (error) {
         console.error("[API] Error fetching parking lots:", error);
+
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }

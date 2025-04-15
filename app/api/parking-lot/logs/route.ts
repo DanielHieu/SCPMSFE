@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/authOptions';
 import { apiFetch } from '@/lib/utils/api';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
         // Get the session to retrieve the parking lot ID
         const session = await getServerSession(authOptions);
@@ -14,6 +14,10 @@ export async function GET() {
                 { status: 401 }
             );
         }
+
+        const { searchParams } = new URL(request.url);
+        const pageIndex = parseInt(searchParams.get('pageIndex') || '1', 10);
+        const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
 
         // Get the parking lot ID from the session
         const parkingLotId = session.user.parkingLot?.parkingLotId;
@@ -33,7 +37,9 @@ export async function GET() {
             },
             body: JSON.stringify({
                 keyword: '',
-                parkingLotId: parkingLotId
+                parkingLotId: parkingLotId,
+                pageIndex: pageIndex,
+                pageSize: pageSize
             }),
         });
 
@@ -43,7 +49,7 @@ export async function GET() {
 
         const data = await response.json();
 
-        return NextResponse.json({ logs: data });
+        return NextResponse.json(data);
     } catch (error) {
         console.error('Error fetching parking logs:', error);
         return NextResponse.json(

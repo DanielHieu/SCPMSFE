@@ -15,9 +15,9 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
   // Check if all requests should be disabled
   if (API_CONFIG.DISABLE_ALL_REQUESTS) {
     console.log('[API DISABLED] Request to:', url, 'Options:', options);
-    
+
     // Return a mock response
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
       message: 'API requests are currently disabled',
       mockData: true
@@ -31,13 +31,13 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
 
   // If not disabled, actually perform the fetch request
   const fullUrl = url.startsWith('http') ? url : `${API_CONFIG.API_URL}${url}`;
-  
+
   // Merge default headers with provided headers
   const headers = {
     ...API_CONFIG.DEFAULT_HEADERS,
     ...options.headers
   };
-  
+
   return fetch(fullUrl, {
     ...options,
     headers
