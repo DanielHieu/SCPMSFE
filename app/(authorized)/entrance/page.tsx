@@ -17,6 +17,9 @@ export default function EntrancePage() {
     const [licensePlate, setLicensePlate] = useState('');
     const [contract, setContract] = useState<Contract | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [verifiedLicensePlate, setVerifiedLicensePlate] = useState('');
+    const [isContractChecked, setIsContractChecked] = useState(false);
+    const [isValidLicensePlate, setIsValidLicensePlate] = useState(false);
 
     const { parkingLotFull, error, fetchParkingLotFull } = useCurrentParkingLot();
     const { addNotification } = useNotification();
@@ -54,6 +57,17 @@ export default function EntrancePage() {
             addNotification(error, "error");
         }
     }, [error, addNotification]);
+
+    // Reset contract check when license plate changes
+    useEffect(() => {
+        if (licensePlate !== verifiedLicensePlate) {
+            setIsContractChecked(false);
+        }
+        
+        // Validate Vietnamese license plate format (e.g., 51F-12345)
+        const regex = /^[0-9]{2}[A-Z]{1}[-][0-9]{5}$/;
+        setIsValidLicensePlate(regex.test(licensePlate));
+    }, [licensePlate, verifiedLicensePlate]);
 
     const getSpaceStyles = (status: string, isSelected: boolean) => {
         const baseStyles = "relative p-4 text-center font-medium rounded-lg transition-all duration-300 border";
@@ -107,6 +121,17 @@ export default function EntrancePage() {
                 } else {
                     addNotification("Không tìm thấy hợp đồng cho biển số này", "info");
                 }
+                
+                // Set verified license plate and mark contract as checked
+                setVerifiedLicensePlate(licensePlate);
+                setIsContractChecked(true);
+            }
+            else{
+                console.log("[API] Error checking contract:", data);
+
+                addNotification(data.message, "error");
+                setIsContractChecked(false);
+                setVerifiedLicensePlate('');
             }
         } catch (error) {
             console.error("Error checking contract:", error);
@@ -124,6 +149,11 @@ export default function EntrancePage() {
 
         if (!licensePlate) {
             addNotification("Vui lòng nhập biển số xe", "warning");
+            return;
+        }
+
+        if (!isContractChecked) {
+            addNotification("Vui lòng kiểm tra hợp đồng trước", "warning");
             return;
         }
 
@@ -161,8 +191,10 @@ export default function EntrancePage() {
 
     const resetForm = () => {
         setLicensePlate('');
+        setVerifiedLicensePlate('');
         setContract(null);
         setSelectedSpace(null);
+        setIsContractChecked(false);
     };
 
     return (
@@ -209,7 +241,15 @@ export default function EntrancePage() {
                                     <input
                                         type="text"
                                         value={licensePlate}
-                                        onChange={(e) => setLicensePlate(e.target.value.toUpperCase())}
+                                        onChange={(e) => {
+                                            const input = e.target.value.toUpperCase();
+                                            // Validate Vietnamese license plate format (e.g., 51F-12345)
+                                            // Allow input during typing but enforce format
+                                            const regex = /^[0-9]{0,2}[A-Z]{0,1}[-]{0,1}[0-9]{0,5}$/;
+                                            if (regex.test(input)) {
+                                                setLicensePlate(input);
+                                            }
+                                        }}
                                         placeholder="VD: 51F-12345"
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
@@ -228,9 +268,11 @@ export default function EntrancePage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${
+                                        isLoading || !isValidLicensePlate ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
                                     onClick={checkContract}
-                                    disabled={isLoading}
+                                    disabled={isLoading || !isValidLicensePlate}
                                 >
                                     {isLoading ? (
                                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -245,9 +287,13 @@ export default function EntrancePage() {
                                     Kiểm tra HĐ
                                 </button>
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${
+                                        isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-green-600 hover:bg-green-700'
+                                    }`}
                                     onClick={handleEntrance}
-                                    disabled={isLoading}
+                                    disabled={isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate}
                                 >
                                     {isLoading ? (
                                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -349,7 +395,7 @@ export default function EntrancePage() {
                         </div>
                     </div>
 
-                    <div className="space-y-6 max-h-[calc(100vh-350px)] overflow-y-auto pr-2">
+                    <div className="space-y-6 overflow-y-auto pr-2">
                         {selectedRentalType === RentalType.Walkin && (
                             <div className="space-y-6">
                                 {walkinAreas && walkinAreas.map((area: Area) => (

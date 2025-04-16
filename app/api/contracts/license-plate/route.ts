@@ -43,14 +43,20 @@ export async function GET(request: NextRequest) {
         console.log('[API] Response status:', response.status);
 
         const data = await response.json();
+        console.log('[API] Response:', data);
         console.log('[API] Contract found:', data?.contract ? 'Yes' : 'No');
+
+        if(!data.success){
+            console.log('[API] Successfully retrieved contract for license plate:', licensePlate);
+            return NextResponse.json({ success: false, contract: null, message: data.message });
+        }
 
         if (!data?.contract) {
             console.log('[API] No contract found for license plate:', licensePlate);
             return NextResponse.json(
                 {
                     success: true,
-                    message: 'No contract found for this license plate',
+                    message: 'Không tìm thấy hợp đồng cho biển số xe này',
                     contract: null
                 },
                 { status: 200 }
@@ -64,7 +70,10 @@ export async function GET(request: NextRequest) {
         console.error('[API] Error fetching contract:', error);
 
         return NextResponse.json(
-            { success: false, message: 'Internal server error' },
+            { 
+                success: false, 
+                message: 'Internal server error' 
+            },
             { status: 500 }
         );
     }
