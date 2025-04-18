@@ -288,7 +288,7 @@ export default function ExitPage() {
                         {exitImageDataUrl && (
                             <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
                                 <p className="text-xs font-medium text-gray-600 mb-1">Ảnh ra đã chụp (Gửi đi):</p>
-                                <img src={exitImageDataUrl} alt="Exit Capture Preview" className="max-w-xs h-auto rounded" />
+                                <Image src={exitImageDataUrl} alt="Exit Capture Preview" className="max-w-xs h-auto rounded"
                             </div>
                         )}
                     </div>

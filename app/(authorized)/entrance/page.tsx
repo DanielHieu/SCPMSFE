@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import Image from "next/image"
 import { useCurrentParkingLot } from '@/lib/hook/useCurrentParkingLot';
 import { Contract } from '@/types/Contract';
 import { RentalType } from '@/types/RentalType';
@@ -347,7 +348,7 @@ export default function EntrancePage() {
                         {entranceImageDataUrl && (
                              <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
                                 <p className="text-xs font-medium text-gray-600 mb-1">Ảnh vào đã chụp (Gửi đi):</p>
-                                <img src={entranceImageDataUrl} alt="Entrance Capture Preview" className="max-w-xs h-auto rounded" />
+                                <Image src={entranceImageDataUrl} alt="Entrance Capture Preview" className="max-w-xs h-auto rounded"
                             </div>
                         )}
                     </motion.div>
