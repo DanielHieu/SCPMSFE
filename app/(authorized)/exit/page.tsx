@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { useParkingLotPrice } from '@/lib/hook/useParkingLotPrice';
 import { Contract } from '@/types/Contract';
 import { ParkingSpace } from '@/types/ParkingLot';
@@ -9,6 +8,7 @@ import { toRentalTypeDisplay } from '@/lib/utils/displayUltil';
 import { useNotification } from '@/lib/context/NotificationContext';
 import { motion } from 'framer-motion';
 import CameraCapture, { CameraCaptureHandle } from '@/components/ui/CameraCapture';
+import Image from 'next/image';
 
 interface ParkingRecord {
     id: string;
@@ -22,6 +22,7 @@ interface ParkingRecord {
     calculationNotes: string;
     contract: Contract | null;
     parkingSpace: ParkingSpace | null;
+    entryImage?: string;
 }
 
 export default function ExitPage() {
@@ -51,14 +52,14 @@ export default function ExitPage() {
             addNotification("Vui lòng nhập biển số xe", "warning");
             return;
         }
-        
+
         // Trigger capture first
         const capturedImage = cameraRef.current?.triggerCapture() ?? null;
         setExitImageDataUrl(capturedImage);
 
         if (capturedImage === null) {
-             addNotification("Không thể chụp ảnh xe ra. Vui lòng bật camera và thử lại.", "warning");
-             return;
+            addNotification("Không thể chụp ảnh xe ra. Vui lòng bật camera và thử lại.", "warning");
+            return;
         }
 
         setIsLoading(true);
@@ -102,7 +103,7 @@ export default function ExitPage() {
             console.log("Processing payment/exit with image:", exitImageDataUrl ? exitImageDataUrl.substring(0, 30) + "..." : "No image");
 
             const response = await fetch(process.env.NEXT_PUBLIC_API_LOCAL_URL + `/api/parking-lot/pay-fee`, {
-                method: 'POST', 
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -111,7 +112,7 @@ export default function ExitPage() {
                     exitImage: exitImageDataUrl
                 }),
             });
-            
+
             const data = await response.json();
 
             if (data.success) {
@@ -196,7 +197,7 @@ export default function ExitPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
                                 )}
-                                Tính phí & Chụp ảnh
+                                Tính phí
                             </button>
                             <button
                                 className="py-3 px-4 rounded-lg text-gray-600 font-medium bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center justify-center"
@@ -288,7 +289,7 @@ export default function ExitPage() {
                         {exitImageDataUrl && (
                             <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
                                 <p className="text-xs font-medium text-gray-600 mb-1">Ảnh ra đã chụp (Gửi đi):</p>
-                                <Image src={exitImageDataUrl} alt="Exit Capture Preview" className="max-w-xs h-auto rounded"
+                                <Image src={exitImageDataUrl} alt="Exit Capture Preview" className="max-w-xs h-auto rounded" />
                             </div>
                         )}
                     </div>
@@ -366,11 +367,11 @@ export default function ExitPage() {
                         </div>
                     ) : (
                         <div className="bg-white rounded-xl shadow-sm p-10 border border-gray-100 text-center text-gray-500">
-                             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <h3 className="mt-2 text-sm font-medium text-gray-900">Chưa có thông tin</h3>
-                            <p className="mt-1 text-sm text-gray-500">Vui lòng nhập biển số xe và bấm "Tính phí" để xem thông tin.</p>
+                            <p className="mt-1 text-sm text-gray-500">Vui lòng nhập biển số xe và bấm <span className="font-bold">Tính phí</span> để xem thông tin.</p>
                         </div>
                     )}
                 </motion.div>
