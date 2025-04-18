@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { EntrancingCar } from '@/types/EntrancingCar';
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [carsInParkingLot, setCarsInParkingLot] = useState<EntrancingCar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeTab, setActiveTab] = useState<'all' | 'walkin' | 'contract'>('all');
   const [stats] = useState({
     totalSpaces: 200,
     occupiedSpaces: 150,
@@ -42,6 +43,17 @@ export default function Dashboard() {
     };
     fetchCarsInParkingLot();
   }, []);
+
+  // Filter cars based on the active tab
+  const filteredCars = useMemo(() => {
+    if (activeTab === 'walkin') {
+      return carsInParkingLot.filter(car => car.rentalType === 'Walkin');
+    }
+    if (activeTab === 'contract') {
+      return carsInParkingLot.filter(car => car.rentalType === 'Contract');
+    }
+    return carsInParkingLot; // 'all' tab
+  }, [carsInParkingLot, activeTab]);
 
   // Fake data for hourly revenue chart
   const hourlyRevenue = [
@@ -275,157 +287,70 @@ export default function Dashboard() {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : carsInParkingLot && carsInParkingLot.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Biển số xe</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khu vực</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tầng</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian vào</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {carsInParkingLot.map((car) => (
-                  <tr key={car.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{car.licensePlate}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.areaName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.floorName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.parkingSpaceName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {car.checkInTime}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.rentalType == "Walkin" ? "Vãng lai" : "Hợp đồng"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
-            <TruckIcon className="h-12 w-12 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-center font-medium">Không có xe nào trong bãi</p>
-            <p className="text-gray-400 text-sm text-center mt-1">Bãi đỗ xe hiện đang trống</p>
+          <div className="rounded-lg border border-gray-200">
+            <div className="border-b border-gray-200">
+              <div className="flex">
+                <button 
+                  className={`px-6 py-3 text-sm font-medium ${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => setActiveTab('all')}
+                >
+                  Tất cả
+                </button>
+                <button 
+                  className={`px-6 py-3 text-sm font-medium ${activeTab === 'walkin' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => setActiveTab('walkin')}
+                >
+                  Vãng lai
+                </button>
+                <button 
+                  className={`px-6 py-3 text-sm font-medium ${activeTab === 'contract' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => setActiveTab('contract')}
+                >
+                  Hợp đồng
+                </button>
+              </div>
+            </div>
+            
+            {filteredCars && filteredCars.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Biển số xe</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khu vực</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tầng</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian vào</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredCars.map((car: EntrancingCar) => (
+                      <tr key={car.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{car.licensePlate}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.areaName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.floorName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.parkingSpaceName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {car.checkInTime}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{car.rentalType === "Walkin" ? "Vãng lai" : "Hợp đồng"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
+                <TruckIcon className="h-12 w-12 text-gray-300 mb-4" />
+                <p className="text-gray-500 text-center font-medium">Không có xe nào trong bãi thuộc loại này</p>
+                <p className="text-gray-400 text-sm text-center mt-1">Chọn tab khác hoặc chờ xe mới vào</p>
+              </div>
+            )}
           </div>
         )}
       </motion.div>
-
-      {/* Charts and statistics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Revenue chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">Doanh thu trong ngày</h2>
-              <p className="text-gray-500 text-sm">Thống kê theo giờ</p>
-            </div>
-            <div className="bg-green-50 p-2 rounded-lg">
-              <ChartBarIcon className="h-5 w-5 text-green-600" />
-            </div>
-          </div>
-
-          <div className="h-64">
-            <div className="h-52 flex items-end justify-between space-x-1">
-              {hourlyRevenue.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-sm"
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(item.amount / maxRevenue) * 100}%` }}
-                  transition={{ duration: 0.5, delay: 0.6 + index * 0.05 }}
-                ></motion.div>
-              ))}
-            </div>
-            <div className="w-full flex justify-between mt-2 text-xs text-gray-500">
-              {hourlyRevenue.filter((_, i) => i % 2 === 0).map((item, index) => (
-                <span key={index}>{item.hour}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4 text-center">
-            <p className="text-2xl font-bold text-blue-600">{stats.revenueToday.toLocaleString()} VND</p>
-            <p className="text-sm text-gray-500">Cập nhật lúc: {currentTime.toLocaleTimeString('vi-VN')}</p>
-          </div>
-        </motion.div>
-
-        {/* Parking lot status */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">Tình trạng bãi đỗ xe</h2>
-              <p className="text-gray-500 text-sm">Tổng quan về công suất sử dụng</p>
-            </div>
-            <div className="bg-blue-50 p-2 rounded-lg">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-
-          <div className="flex justify-center mb-6">
-            <div className="relative w-48 h-48">
-              <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" strokeWidth="10" />
-                <motion.circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="10"
-                  strokeDasharray="283"
-                  initial={{ strokeDashoffset: 283 }}
-                  animate={{ strokeDashoffset: 283 - (283 * stats.percentageOccupied) / 100 }}
-                  transition={{ duration: 1, delay: 0.7 }}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <motion.span
-                  className="text-3xl font-bold text-blue-600"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                >
-                  {stats.percentageOccupied}%
-                </motion.span>
-                <span className="text-sm text-gray-500">Đã sử dụng</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Số xe hiện tại</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.occupiedSpaces}</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Tổng số chỗ đỗ</p>
-              <p className="text-2xl font-bold text-green-600">{stats.totalSpaces}</p>
-            </div>
-            <div className="bg-amber-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Chỗ trống</p>
-              <p className="text-2xl font-bold text-amber-600">{stats.totalSpaces - stats.occupiedSpaces}</p>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Thời gian trung bình</p>
-              <p className="text-2xl font-bold text-purple-600">2.5h</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
     </div>
   );
 }

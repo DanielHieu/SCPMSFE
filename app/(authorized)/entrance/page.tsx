@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from 'react';
-import Image from 'next/image';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useCurrentParkingLot } from '@/lib/hook/useCurrentParkingLot';
 import { Contract } from '@/types/Contract';
 import { RentalType } from '@/types/RentalType';
@@ -10,6 +9,7 @@ import { useNotification } from '@/lib/context/NotificationContext';
 import { ParkingSpaceStatus } from '@/types/ParkingSpaceStatus';
 import { motion } from 'framer-motion';
 import { Area } from '@/types/ParkingLot';
+import CameraCapture, { CameraCaptureHandle } from '@/components/ui/CameraCapture';
 
 export default function EntrancePage() {
     const [selectedRentalType, setSelectedRentalType] = useState<RentalType>(RentalType.Walkin);
@@ -20,6 +20,8 @@ export default function EntrancePage() {
     const [verifiedLicensePlate, setVerifiedLicensePlate] = useState('');
     const [isContractChecked, setIsContractChecked] = useState(false);
     const [isValidLicensePlate, setIsValidLicensePlate] = useState(false);
+    const [entranceImageDataUrl, setEntranceImageDataUrl] = useState<string | null>(null);
+    const cameraRef = useRef<CameraCaptureHandle>(null);
 
     const { parkingLotFull, error, fetchParkingLotFull } = useCurrentParkingLot();
     const { addNotification } = useNotification();
@@ -125,8 +127,7 @@ export default function EntrancePage() {
                 // Set verified license plate and mark contract as checked
                 setVerifiedLicensePlate(licensePlate);
                 setIsContractChecked(true);
-            }
-            else{
+            } else {
                 console.log("[API] Error checking contract:", data);
 
                 addNotification(data.message, "error");
@@ -156,6 +157,19 @@ export default function EntrancePage() {
             addNotification("Vui lòng kiểm tra hợp đồng trước", "warning");
             return;
         }
+        
+        // Trigger capture via ref
+        const capturedImage = cameraRef.current?.triggerCapture() ?? null; // Ensure null if capture fails
+
+        // Optional: Check if capture was successful (camera might be off or errored)
+        if (capturedImage === null) { // Check for explicit null
+            addNotification("Không thể chụp ảnh. Vui lòng bật camera và thử lại.", "warning");
+             // Decide if you want to proceed without image or stop here
+            // return; 
+        }
+        
+        // Update state for preview (optional, if you removed the other preview)
+        setEntranceImageDataUrl(capturedImage);
 
         setIsLoading(true);
         try {
@@ -167,16 +181,15 @@ export default function EntrancePage() {
                 body: JSON.stringify({
                     licensePlate: licensePlate,
                     parkingSpaceId: selectedSpace,
-                    rentalType: contract != null && contract.status == ContractStatus.Active ? RentalType.Contract : RentalType.Walkin
+                    rentalType: contract != null && contract.status == ContractStatus.Active ? RentalType.Contract : RentalType.Walkin,
+                    entranceImage: capturedImage // Use the captured image data directly (can be null)
                 })
             });
 
             if (response.ok) {
                 fetchParkingLotFull();
-
                 addNotification("Xe đã vào bãi thành công", "success");
-
-                resetForm();
+                resetForm(); // This will also clear the entranceImageDataUrl state
             } else {
                 const errorData = await response.json();
                 addNotification(errorData.message || "Lỗi khi vào bãi", "error");
@@ -195,6 +208,7 @@ export default function EntrancePage() {
         setContract(null);
         setSelectedSpace(null);
         setIsContractChecked(false);
+        setEntranceImageDataUrl(null); // Reset image state on form reset
     };
 
     return (
@@ -328,20 +342,14 @@ export default function EntrancePage() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
                     >
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Camera giám sát</h2>
-                        <div className="relative rounded-lg overflow-hidden shadow-inner border border-gray-200">
-                            <Image
-                                src="/images/entrance.jpg"
-                                alt="Entry Camera Feed"
-                                width={500}
-                                height={300}
-                                className="w-full rounded-lg object-cover"
-                            />
-                            <div className="absolute top-2 right-2 bg-red-500 w-3 h-3 rounded-full animate-pulse"></div>
-                            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                                LIVE
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Camera Xe Vào</h2>
+                        <CameraCapture ref={cameraRef} />
+                        {entranceImageDataUrl && (
+                             <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                <p className="text-xs font-medium text-gray-600 mb-1">Ảnh vào đã chụp (Gửi đi):</p>
+                                <img src={entranceImageDataUrl} alt="Entrance Capture Preview" className="max-w-xs h-auto rounded" />
                             </div>
-                        </div>
+                        )}
                     </motion.div>
                 </div>
 
