@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-
+import React, {
+    useState,
+    useRef, useEffect,
+    forwardRef,
+    useImperativeHandle
+} from 'react';
 
 // Define the methods that will be exposed via the ref
 export interface CameraCaptureHandle {

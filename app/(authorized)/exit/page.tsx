@@ -8,7 +8,6 @@ import { toRentalTypeDisplay } from '@/lib/utils/displayUltil';
 import { useNotification } from '@/lib/context/NotificationContext';
 import { motion } from 'framer-motion';
 import CameraCapture, { CameraCaptureHandle } from '@/components/ui/CameraCapture';
-import Image from 'next/image';
 
 interface ParkingRecord {
     id: string;
