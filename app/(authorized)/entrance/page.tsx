@@ -323,9 +323,9 @@ export default function EntrancePage() {
                                         value={licensePlate}
                                         onChange={(e) => {
                                             const input = e.target.value.toUpperCase();
-                                            // Validate Vietnamese license plate format (e.g., 51F-12345)
+                                            // Validate Vietnamese license plate format (e.g., 51F-12345 or 51D-123.45)
                                             // Allow input during typing but enforce format
-                                            const regex = /^[0-9]{0,2}[A-Z]{0,1}[-]{0,1}[0-9]{0,5}$/;
+                                            const regex = /^[0-9]{0,2}[A-Z]{0,1}[-]{0,1}[0-9]{0,3}[.]{0,1}[0-9]{0,2}$/;
                                             if (regex.test(input)) {
                                                 setLicensePlate(input);
                                             }

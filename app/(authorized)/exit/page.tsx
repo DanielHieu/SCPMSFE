@@ -169,7 +169,15 @@ export default function ExitPage() {
                                 <input
                                     className="w-full px-4 py-3 rounded-lg border border-gray-300
                                     focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    onChange={(e) => setLicensePlate(e.target.value.toUpperCase())}
+                                    onChange={(e) => {
+                                        const input = e.target.value.toUpperCase();
+                                        // Validate Vietnamese license plate format (e.g., 51F-12345 or 51D-123.45)
+                                        // Allow input during typing but enforce format
+                                        const regex = /^[0-9]{0,2}[A-Z]{0,1}[-]{0,1}[0-9]{0,3}[.]{0,1}[0-9]{0,2}$/;
+                                        if (regex.test(input)) {
+                                            setLicensePlate(input);
+                                        }
+                                    }}
                                     type="text"
                                     placeholder="VD: 51F-12345"
                                     value={licensePlate}
