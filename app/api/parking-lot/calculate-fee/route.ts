@@ -21,9 +21,8 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Get query parameters
-        const searchParams = request.nextUrl.searchParams;
-        const licensePlate = searchParams.get("licensePlate");
+        // Get request body
+        const licensePlate = request.nextUrl.searchParams.get('licensePlate');
         const parkingLotId = session.user.parkingLot?.parkingLotId;
 
         console.log(`[API] Request parameters: licensePlate=${licensePlate}, parkingLotId=${parkingLotId}`);

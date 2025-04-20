@@ -22,7 +22,7 @@ interface ParkingRecord {
     calculationNotes: string;
     contract: Contract | null;
     parkingSpace: ParkingSpace | null;
-    entryImage?: string;
+    entranceImage?: string;
 }
 
 export default function ExitPage() {
@@ -36,6 +36,7 @@ export default function ExitPage() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [exitImageDataUrl, setExitImageDataUrl] = useState<string | null>(null);
     const cameraRef = useRef<CameraCaptureHandle>(null);
+    const [activeTab, setActiveTab] = useState<'camera' | 'image'>('camera');
 
     // Update current time every minute
     useEffect(() => {
@@ -54,8 +55,12 @@ export default function ExitPage() {
         }
 
         // Trigger capture first
-        const capturedImage = cameraRef.current?.triggerCapture() ?? null;
-        setExitImageDataUrl(capturedImage);
+        const capturedImage = await cameraRef.current?.triggerCapture();
+        setExitImageDataUrl(capturedImage ?? null);
+
+        if (capturedImage) {
+            setActiveTab('image'); // Switch to image tab after capturing
+        }
 
         if (capturedImage === null) {
             addNotification("Không thể chụp ảnh xe ra. Vui lòng bật camera và thử lại.", "warning");
@@ -87,6 +92,7 @@ export default function ExitPage() {
         setLicensePlate('');
         setParkingRecord(null);
         setExitImageDataUrl(null);
+        setActiveTab('camera');
         addNotification("Đã xóa thông tin tìm kiếm", "info");
     };
 
@@ -99,6 +105,7 @@ export default function ExitPage() {
         }
 
         setIsLoading(true);
+
         try {
             console.log("Processing payment/exit with image:", exitImageDataUrl ? exitImageDataUrl.substring(0, 30) + "..." : "No image");
 
@@ -207,7 +214,7 @@ export default function ExitPage() {
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
-                                Reset
+                                Làm mới
                             </button>
                         </div>
                     </motion.div>
@@ -282,18 +289,79 @@ export default function ExitPage() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="lg:col-span-2 space-y-6"
                 >
-                    {/* Camera Feed */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Camera Xe Ra</h2>
-                        <CameraCapture ref={cameraRef} />
-                        {exitImageDataUrl && (
-                            <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
-                                <p className="text-xs font-medium text-gray-600 mb-1">Ảnh ra đã chụp (Gửi đi):</p>
-                                <Image src={exitImageDataUrl} alt="Exit Capture Preview" className="max-w-xs h-auto rounded" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Camera Feed with Tabs */}
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <div className="flex border-b border-gray-200 mb-4">
+                                <button
+                                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'camera'
+                                        ? 'border-b-2 border-blue-500 text-blue-600'
+                                        : 'text-gray-500 hover:text-gray-700'}`}
+                                    onClick={() => setActiveTab('camera')}
+                                >
+                                    Camera Xe Ra
+                                </button>
+                                <button
+                                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'image'
+                                        ? 'border-b-2 border-blue-500 text-blue-600'
+                                        : 'text-gray-500 hover:text-gray-700'}`}
+                                    onClick={() => setActiveTab('image')}
+                                    disabled={!exitImageDataUrl}
+                                >
+                                    Ảnh Xe Ra
+                                </button>
                             </div>
-                        )}
-                    </div>
 
+                            {activeTab === 'camera' && (
+                                <div className="relative w-full h-0 pb-[75%]">
+                                    <div className="absolute inset-0">
+                                        <CameraCapture ref={cameraRef} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'image' && exitImageDataUrl && (
+                                <div className="flex flex-col items-center">
+                                    <img
+                                        src={exitImageDataUrl}
+                                        alt="Ảnh xe ra"
+                                        className="max-w-full rounded border border-gray-200"
+                                    />
+                                    <button
+                                        onClick={() => setActiveTab('camera')}
+                                        className="mt-3 text-sm text-blue-600 hover:text-blue-800"
+                                    >
+                                        Chụp lại ảnh
+                                    </button>
+                                </div>
+                            )}
+
+                            {activeTab === 'image' && !exitImageDataUrl && (
+                                <div className="flex items-center justify-center h-[250px] bg-gray-100 rounded-lg">
+                                    <span className="text-gray-500">Chưa có ảnh xe ra</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <h2 className="font-medium text-sm border-b border-gray-200 mb-4 p-3">Ảnh vào</h2>
+                            {parkingRecord?.entranceImage ? (
+                                <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                    <img src={parkingRecord.entranceImage} alt="Entrance Capture Preview" className="max-w-full h-auto rounded" />
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center h-[250px] bg-gray-100 rounded-lg border border-gray-200">
+                                    <div className="text-center p-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span className="text-gray-500 font-medium">Chưa có ảnh xe vào</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     {/* Fee Information */}
                     {parkingRecord ? (
                         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">

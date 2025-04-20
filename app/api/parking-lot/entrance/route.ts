@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
         // Parse the request body
         const body = await request.json();
-        const { licensePlate, parkingSpaceId, rentalType } = body;
+        const { licensePlate, parkingSpaceId, rentalType, entranceImage } = body;
 
         // Validate input
         if (!licensePlate || !parkingSpaceId) {
@@ -32,7 +32,8 @@ export async function POST(request: Request) {
             body: JSON.stringify({
                 licensePlate,
                 parkingSpaceId,
-                rentalType: rentalType === RentalType.Walkin ? 1 : 2
+                rentalType: rentalType === RentalType.Walkin ? 1 : 2,
+                entranceImage: entranceImage
             })
         });
 

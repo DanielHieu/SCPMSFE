@@ -10,7 +10,6 @@ import { ParkingSpaceStatus } from '@/types/ParkingSpaceStatus';
 import { motion } from 'framer-motion';
 import { Area } from '@/types/ParkingLot';
 import CameraCapture, { CameraCaptureHandle } from '@/components/ui/CameraCapture';
-import Image from 'next/image';
 
 export default function EntrancePage() {
     const [selectedRentalType, setSelectedRentalType] = useState<RentalType>(RentalType.Walkin);
@@ -66,10 +65,10 @@ export default function EntrancePage() {
         if (licensePlate !== verifiedLicensePlate) {
             setIsContractChecked(false);
         }
-        
+
         // Validate if the license plate field is not empty to enable the button
         // The actual format validation should ideally happen server-side or upon submission
-        setIsValidLicensePlate(licensePlate.trim().length > 0); 
+        setIsValidLicensePlate(licensePlate.trim().length > 0);
 
     }, [licensePlate, verifiedLicensePlate]);
 
@@ -125,7 +124,7 @@ export default function EntrancePage() {
                 } else {
                     addNotification("Không tìm thấy hợp đồng cho biển số này", "info");
                 }
-                
+
                 // Set verified license plate and mark contract as checked
                 setVerifiedLicensePlate(licensePlate);
                 setIsContractChecked(true);
@@ -159,24 +158,35 @@ export default function EntrancePage() {
             addNotification("Vui lòng kiểm tra hợp đồng trước", "warning");
             return;
         }
-        
-        // Trigger capture via ref
-        const capturedImage = cameraRef.current?.triggerCapture() ?? null;
 
-        // Optional: Check if capture was successful (camera might be off or errored)
-        if (capturedImage === null) {
-            addNotification("Không thể chụp ảnh. Vui lòng bật camera và thử lại.", "warning");
-            // return; // Decide if you want to stop here
+        // Use existing image if available, otherwise capture a new one
+        let capturedImage = entranceImageDataUrl;
+        if (!capturedImage) {
+            try {
+                capturedImage = (await cameraRef.current?.triggerCapture()) ?? null;
+
+                if (!capturedImage)
+                    addNotification("Không thể chụp ảnh. Vui lòng bật camera và thử lại.", "warning");
+            } catch (error) {
+                console.error("Không thể chụp ảnh:", error);
+
+                addNotification("Lỗi khi chụp ảnh", "error");
+            }
+
+            // Update state for preview
+            setEntranceImageDataUrl(capturedImage);
         }
-        
-        // Update state for preview (optional)
-        setEntranceImageDataUrl(capturedImage);
-
-        // Log the captured image data right before sending
-        console.log("[handleEntrance] Image data BEFORE fetch:", capturedImage ? capturedImage.substring(0, 50) + "..." : "NULL");
 
         setIsLoading(true);
+
         try {
+            // Prepare the image data - ensure it's properly formatted for API
+            let imageData = capturedImage;
+            if (imageData && !imageData.startsWith('data:image')) {
+                // If the image doesn't have the proper prefix, add it
+                imageData = `data:image/jpeg;base64,${imageData}`;
+            }
+
             const response = await fetch(process.env.NEXT_PUBLIC_API_LOCAL_URL + "/api/parking-lot/entrance", {
                 method: "POST",
                 headers: {
@@ -186,7 +196,7 @@ export default function EntrancePage() {
                     licensePlate: licensePlate,
                     parkingSpaceId: selectedSpace,
                     rentalType: contract != null && contract.status == ContractStatus.Active ? RentalType.Contract : RentalType.Walkin,
-                    entranceImage: capturedImage // Use the captured image data directly (can be null)
+                    entranceImage: imageData // Use the properly formatted image data
                 })
             });
 
@@ -244,6 +254,58 @@ export default function EntrancePage() {
                         </div>
                     </motion.div>
 
+                    {/* Camera Feed */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="bg-white rounded-xl shadow-sm px-6 pt-6 pb-0 border border-gray-100"
+                    >
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Camera Xe Vào</h2>
+                        <div className="flex border-b border-gray-200 mb-4">
+                            <button
+                                className={`px-4 py-2 font-medium text-sm ${!entranceImageDataUrl
+                                    ? 'border-b-2 border-blue-500 text-blue-600'
+                                    : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setEntranceImageDataUrl(null)}
+                            >
+                                Camera Xe Vào
+                            </button>
+                            <button
+                                className={`px-4 py-2 font-medium text-sm ${entranceImageDataUrl
+                                    ? 'border-b-2 border-blue-500 text-blue-600'
+                                    : 'text-gray-500 hover:text-gray-700'}`}
+                                disabled={!entranceImageDataUrl}
+                            >
+                                Ảnh Xe Vào
+                            </button>
+                        </div>
+
+                        {!entranceImageDataUrl && (
+                            <div className="relative w-full h-0 pb-[75%]">
+                                <div className="absolute inset-0">
+                                    <CameraCapture ref={cameraRef} />
+                                </div>
+                            </div>
+                        )}
+
+                        {entranceImageDataUrl && (
+                            <div className="flex flex-col items-center">
+                                <img
+                                    src={entranceImageDataUrl}
+                                    alt="Ảnh xe vào"
+                                    className="max-w-full rounded border border-gray-200"
+                                />
+                                <button
+                                    onClick={() => setEntranceImageDataUrl(null)}
+                                    className="mt-3 text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                    Chụp lại ảnh
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+
                     {/* License Plate Input */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -270,6 +332,9 @@ export default function EntrancePage() {
                                         }}
                                         placeholder="VD: 51F-12345"
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        maxLength={9}
+                                        autoComplete="off"
+                                        inputMode="text"
                                     />
                                     {licensePlate && (
                                         <button
@@ -286,9 +351,8 @@ export default function EntrancePage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${
-                                        isLoading || !isValidLicensePlate ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                                    }`}
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isValidLicensePlate ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                        }`}
                                     onClick={checkContract}
                                     disabled={isLoading || !isValidLicensePlate}
                                 >
@@ -305,11 +369,10 @@ export default function EntrancePage() {
                                     Kiểm tra HĐ
                                 </button>
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${
-                                        isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate 
-                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate
+                                        ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-green-600 hover:bg-green-700'
-                                    }`}
+                                        }`}
                                     onClick={handleEntrance}
                                     disabled={isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate}
                                 >
@@ -334,27 +397,12 @@ export default function EntrancePage() {
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
-                                Reset
+                                Làm mới
                             </button>
                         </div>
                     </motion.div>
 
-                    {/* Camera Feed */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-                    >
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Camera Xe Vào</h2>
-                        <CameraCapture ref={cameraRef} />
-                        {entranceImageDataUrl && (
-                             <div className="mt-4 border border-gray-300 rounded-lg p-2 bg-gray-50">
-                                <p className="text-xs font-medium text-gray-600 mb-1">Ảnh vào đã chụp (Gửi đi):</p>
-                                <Image src={entranceImageDataUrl} alt="Entrance Capture Preview" className="max-w-xs h-auto rounded" />
-                            </div>
-                        )}
-                    </motion.div>
+
                 </div>
 
                 {/* Right column - Parking Spaces */}

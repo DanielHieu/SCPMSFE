@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { EntrancingCar } from '@/types/EntrancingCar';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon, ArrowLeftIcon, ClockIcon, ChartBarIcon, TableCellsIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ArrowLeftIcon, ClockIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { TruckIcon } from '@heroicons/react/24/solid';
 
 export default function Dashboard() {
@@ -12,11 +12,12 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState<'all' | 'walkin' | 'contract'>('all');
-  const [stats] = useState({
-    totalSpaces: 200,
-    occupiedSpaces: 150,
-    revenueToday: 2450000,
-    percentageOccupied: 75
+  const [stats, setStats] = useState({
+    totalSpaces: 0,
+    occupiedSpaces: 0,
+    revenueToday: 0,
+    percentageOccupied: 0,
+    visitsToday: 0
   });
 
   // Update current time every minute
@@ -41,7 +42,15 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     };
+
+    const fetchStatsToday = async () => {
+      const response = await fetch('/api/parking-lot/stats');
+      const data = await response.json();
+      setStats(data);
+    };
+
     fetchCarsInParkingLot();
+    fetchStatsToday();
   }, []);
 
   // Filter cars based on the active tab
@@ -108,7 +117,7 @@ export default function Dashboard() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
       >
         <motion.div variants={item}>
           <Link href="/entrance" className="block h-full">
@@ -136,21 +145,6 @@ export default function Dashboard() {
               </div>
               <h2 className="text-xl font-semibold mb-2 text-green-900">Xe ra bãi</h2>
               <p className="text-green-700">Quản lý xe ra bãi đỗ xe</p>
-            </div>
-          </Link>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Link href="/tasks" className="block h-full">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-6 border border-purple-200 h-full hover:shadow-md transition-all duration-200 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-purple-100 p-2 rounded-lg group-hover:bg-purple-200 transition-colors">
-                  <TableCellsIcon className="h-6 w-6 text-purple-600" />
-                </div>
-                <span className="text-xs font-medium py-1 px-2 rounded-full bg-purple-100 text-purple-800">Manage</span>
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-purple-900">Quản lý công việc</h2>
-              <p className="text-purple-700">Xem và quản lý công việc</p>
             </div>
           </Link>
         </motion.div>
@@ -197,7 +191,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-gray-500 text-sm">Xe trong bãi</p>
+              <p className="text-gray-500 text-sm">Vị trí đã sử dụng</p>
               <h3 className="text-2xl font-bold text-gray-800">{stats.occupiedSpaces}</h3>
             </div>
             <div className="p-2 bg-green-50 rounded-lg">
@@ -209,12 +203,11 @@ export default function Dashboard() {
           </div>
           <p className="text-sm text-gray-500 mt-2">{stats.totalSpaces - stats.occupiedSpaces} chỗ trống</p>
         </div>
-
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-gray-500 text-sm">Doanh thu hôm nay</p>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.revenueToday.toLocaleString()} VND</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{stats?.revenueToday?.toLocaleString('vi-VN')} VND</h3>
             </div>
             <div className="p-2 bg-amber-50 rounded-lg">
               <ChartBarIcon className="h-5 w-5 text-amber-600" />
@@ -229,7 +222,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-gray-500 text-sm">Lượt xe trong ngày</p>
-              <h3 className="text-2xl font-bold text-gray-800">187</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{stats?.visitsToday}</h3>
             </div>
             <div className="p-2 bg-purple-50 rounded-lg">
               <ArrowRightIcon className="h-5 w-5 text-purple-600" />
