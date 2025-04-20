@@ -332,7 +332,7 @@ export default function EntrancePage() {
                                         }}
                                         placeholder="VD: 51F-12345"
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                        maxLength={9}
+                                        maxLength={10}
                                         autoComplete="off"
                                         inputMode="text"
                                     />
