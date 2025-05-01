@@ -64,7 +64,7 @@ export default function SignIn() {
       });
 
       if (res?.error) {
-        setError("Invalid credentials");
+        setError("Thông tin đăng nhập không chính xác");
         return;
       }
 
@@ -72,7 +72,7 @@ export default function SignIn() {
       router.refresh();
     } catch (error) {
       console.error("Error signing in:", error);
-      setError("Something went wrong");
+      setError("Lỗi khi đăng nhập");
     }
   };
 

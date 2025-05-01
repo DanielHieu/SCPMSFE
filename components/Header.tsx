@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import UserDropdown from "./UserDropDown";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
+  const { data: session } = useSession();
+  const parkingLotName = session?.user?.parkingLot?.name || session?.user?.parkingLot?.parkingLotName || "Smart Parking";
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center m-auto justify-between px-4 md:px-0">
@@ -29,7 +35,12 @@ const Header = () => {
               <path d="M9 18l1.5 2" />
               <path d="M15 18l-1.5 2" />
             </svg>
-            <span className="inline-block font-bold">Smart Parking</span>
+            <div className="flex flex-col">
+              <span className="inline-block font-bold">Smart Parking</span>
+              {session?.user?.parkingLot && (
+                <span className="text-xs text-blue-600 font-medium">{parkingLotName}</span>
+              )}
+            </div>
           </Link>
           <nav className="hidden gap-6 md:flex">
             <Link href="/entrance" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">

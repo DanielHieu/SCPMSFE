@@ -9,6 +9,9 @@ export interface Contract {
     parkingSpaceId: number;
     parkingLotId: number;
     parkingSpaceName: string;
+    parkingLotName: string;
+    areaName: string;
+    floorName: string;
     car: {
         licensePlate: string;
         make?: string;

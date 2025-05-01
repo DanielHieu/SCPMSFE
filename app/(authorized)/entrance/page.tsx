@@ -159,6 +159,12 @@ export default function EntrancePage() {
             return;
         }
 
+        // Ensure the license plate hasn't changed since verification
+        if (licensePlate !== verifiedLicensePlate) {
+            addNotification("Biển số xe đã thay đổi. Vui lòng kiểm tra lại hợp đồng.", "warning");
+            return;
+        }
+
         // Use existing image if available, otherwise capture a new one
         let capturedImage = entranceImageDataUrl;
         if (!capturedImage) {
@@ -322,6 +328,9 @@ export default function EntrancePage() {
                                         type="text"
                                         value={licensePlate}
                                         onChange={(e) => {
+                                            // Prevent changes if contract is already checked
+                                            if (isContractChecked) return;
+
                                             const input = e.target.value.toUpperCase();
                                             // Validate Vietnamese license plate format (e.g., 51F-12345 or 51D-123.45)
                                             // Allow input during typing but enforce format
@@ -331,12 +340,13 @@ export default function EntrancePage() {
                                             }
                                         }}
                                         placeholder="VD: 51F-12345"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${isContractChecked ? 'bg-gray-100' : ''}`}
                                         maxLength={10}
                                         autoComplete="off"
                                         inputMode="text"
+                                        disabled={isContractChecked}
                                     />
-                                    {licensePlate && (
+                                    {licensePlate && !isContractChecked && (
                                         <button
                                             onClick={() => setLicensePlate('')}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -347,26 +357,41 @@ export default function EntrancePage() {
                                         </button>
                                     )}
                                 </div>
+                                {isContractChecked && (
+                                    <p className="mt-1 text-xs text-blue-600">
+                                        Biển số xe đã được khóa sau khi kiểm tra. Nhấn "Làm mới" để thay đổi.
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isValidLicensePlate ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : isContractChecked
+                                            ? 'bg-green-600 cursor-default'
+                                            : !isValidLicensePlate
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-blue-600 hover:bg-blue-700'
                                         }`}
                                     onClick={checkContract}
-                                    disabled={isLoading || !isValidLicensePlate}
+                                    disabled={isLoading || !isValidLicensePlate || isContractChecked}
                                 >
                                     {isLoading ? (
                                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
+                                    ) : isContractChecked ? (
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
                                     ) : (
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                         </svg>
                                     )}
-                                    Kiểm tra HĐ
+                                    {isContractChecked ? 'Đã kiểm tra' : 'Kiểm tra HĐ'}
                                 </button>
                                 <button
                                     className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate
@@ -401,8 +426,6 @@ export default function EntrancePage() {
                             </button>
                         </div>
                     </motion.div>
-
-
                 </div>
 
                 {/* Right column - Parking Spaces */}
@@ -560,9 +583,12 @@ export default function EntrancePage() {
                                 <div>
                                     <p><span className="font-medium">Khách hàng:</span> {contract.car?.customerName}</p>
                                     <p><span className="font-medium">Biển số xe:</span> {contract.car?.licensePlate}</p>
-                                    <p><span className="font-medium">Vị trí đỗ xe:</span> {contract.parkingSpaceId || "N/A"}</p>
+                                    <p><span className="font-medium">Bãi đỗ xe:</span> {contract.parkingLotName || "N/A"}</p>
+                                    <p><span className="font-medium">Khu vực:</span> {contract.areaName || "N/A"}</p>
                                 </div>
                                 <div>
+                                    <p><span className="font-medium">Tầng:</span> {contract.floorName || "N/A"}</p>
+                                    <p><span className="font-medium">Vị trí đỗ xe:</span> {contract.parkingSpaceName || "N/A"}</p>
                                     <p><span className="font-medium">Ngày bắt đầu:</span> {new Date(contract.startDate).toLocaleDateString()}</p>
                                     <p><span className="font-medium">Ngày kết thúc:</span> {new Date(contract.endDate).toLocaleDateString()}</p>
                                     <p><span className="font-medium">Trạng thái:</span> <span className={contract.status === ContractStatus.Active ? "text-green-600" : "text-red-600"}>

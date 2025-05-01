@@ -228,15 +228,6 @@ export default function Dashboard() {
               <ArrowRightIcon className="h-5 w-5 text-purple-600" />
             </div>
           </div>
-          <div className="flex items-center">
-            <div className="flex items-center text-green-600">
-              <span className="text-xs font-medium">+12%</span>
-              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </div>
-            <span className="text-xs text-gray-500 ml-2">so với hôm qua</span>
-          </div>
         </div>
       </motion.div>
 

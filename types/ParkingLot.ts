@@ -4,6 +4,7 @@ import { RentalType } from "./RentalType";
 export interface ParkingLot {
     parkingLotId: number;
     name: string;
+    parkingLotName: string;
     address: string;
 }
 
