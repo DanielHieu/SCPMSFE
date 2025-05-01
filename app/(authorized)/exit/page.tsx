@@ -204,7 +204,7 @@ export default function ExitPage() {
                             </div>
                             {isLicensePlateLocked && (
                                 <p className="mt-1 text-xs text-blue-600">
-                                    Biển số xe đã được khóa sau khi tính phí. Nhấn "Làm mới" để thay đổi.
+                                    Biển số xe đã được khóa sau khi tính phí. Nhấn <i>Làm mới</i> để thay đổi.
                                 </p>
                             )}
                         </div>

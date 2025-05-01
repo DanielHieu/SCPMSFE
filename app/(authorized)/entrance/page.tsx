@@ -359,7 +359,7 @@ export default function EntrancePage() {
                                 </div>
                                 {isContractChecked && (
                                     <p className="mt-1 text-xs text-blue-600">
-                                        Biển số xe đã được khóa sau khi kiểm tra. Nhấn "Làm mới" để thay đổi.
+                                        Biển số xe đã được khóa sau khi kiểm tra. Nhấn <i>Làm mới</i> để thay đổi.
                                     </p>
                                 )}
                             </div>
