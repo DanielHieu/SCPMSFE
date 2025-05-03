@@ -206,7 +206,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-gray-500 text-sm">Doanh thu hôm nay</p>
+              <p className="text-gray-500 text-sm">Doanh thu vãng lai hôm nay</p>
               <h3 className="text-2xl font-bold text-gray-800">{stats?.revenueToday?.toLocaleString('vi-VN')} VND</h3>
             </div>
             <div className="p-2 bg-amber-50 rounded-lg">

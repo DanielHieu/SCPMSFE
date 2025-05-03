@@ -394,12 +394,12 @@ export default function EntrancePage() {
                                     {isContractChecked ? 'Đã kiểm tra' : 'Kiểm tra HĐ'}
                                 </button>
                                 <button
-                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate
+                                    className={`py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate || selectedSpace === null
                                         ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-green-600 hover:bg-green-700'
                                         }`}
                                     onClick={handleEntrance}
-                                    disabled={isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate}
+                                    disabled={isLoading || !isContractChecked || licensePlate !== verifiedLicensePlate || selectedSpace === null}
                                 >
                                     {isLoading ? (
                                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
