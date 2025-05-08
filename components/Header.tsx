@@ -44,17 +44,16 @@ const Header = () => {
           </Link>
           <nav className="hidden gap-6 md:flex">
             <Link href="/entrance" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">
-              Xe vào bãi
+              Quản lý xe vào
             </Link>
             <Link href="/exit" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">
-              Xe ra bãi
+              Quản lý xe ra
             </Link>
             <Link href="/statistics" className="flex items-center text-sm font-medium transition-colors hover:text-foreground/80">
-              Thống kê
+              Báo cáo & Thống kê
             </Link>
           </nav>
         </div>
-
         <UserDropdown />
       </div>
     </header>

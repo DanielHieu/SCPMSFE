@@ -13,6 +13,8 @@ interface EntryExitLog {
     totalAmount: number;
     rentalType: string;
     parkingSpaceName: string;
+    floorName: string;
+    areaName: string;
     isPaid: boolean;
     parkingSpaceStatus: string;
     entranceImage: string;
@@ -59,12 +61,33 @@ export default function StatisticsPage() {
     const getParkingSpaceStatus = (status: string) => {
         switch (status) {
             case 'Pending':
-                return 'Xe đang vào/ra';
+                return 'Xe đang trong bãi';
             case 'Occupied':
                 return 'Xe đang đỗ';
             default:
-                return 'Trạng thái không xác định';
+                return 'Xe đang trong bãi';
         }
+    };
+
+    const getStatusColor = (status: string, isPaid: boolean) => {
+        if (isPaid) {
+            return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        }
+        
+        switch (status) {
+            case 'Pending':
+                return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'Occupied':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            default:
+                return 'bg-amber-100 text-amber-800 border-amber-200';
+        }
+    };
+
+    const getRentalTypeInfo = (rentalType: string) => {
+        return rentalType === "Walkin" 
+            ? { text: "Vãng lai", color: "bg-orange-100 text-orange-800 border-orange-200" }
+            : { text: "Hợp đồng", color: "bg-purple-100 text-purple-800 border-purple-200" };
     };
 
     const formatCurrency = (amount: number) => {
@@ -167,27 +190,38 @@ export default function StatisticsPage() {
                                                 {log.exitTime}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {log.isPaid ? formatCurrency(log.totalAmount) : ''}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {log.rentalType == "Walkin" ? "Vãng lai" : "Hợp đồng"}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {log.parkingSpaceName}
+                                                {log.isPaid ? (
+                                                    <span className="font-semibold text-emerald-600">
+                                                        {formatCurrency(log.totalAmount)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-gray-400 italic">Chưa thanh toán</span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                {log.isPaid ?
-                                                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Đã thanh toán
-                                                    </span> :
-                                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${log.parkingSpaceStatus === 'Occupied' ? 'bg-blue-100 text-blue-800' :
-                                                        log.parkingSpaceStatus === 'Reserved' ? 'bg-yellow-100 text-yellow-800' :
-                                                            log.parkingSpaceStatus === 'Unavailable' ? 'bg-red-100 text-red-800' :
-                                                                'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {getParkingSpaceStatus(log.parkingSpaceStatus)}
+                                                {(() => {
+                                                    const rentalInfo = getRentalTypeInfo(log.rentalType);
+                                                    return (
+                                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full border ${rentalInfo.color}`}>
+                                                            {rentalInfo.text}
+                                                        </span>
+                                                    );
+                                                })()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-gray-900">{log.parkingSpaceName}</span>
+                                                    <span className="text-xs text-gray-500">
+                                                        {log.floorName && log.areaName
+                                                            ? `${log.floorName} • ${log.areaName}`
+                                                            : log.floorName || log.areaName || 'Không xác định'}
                                                     </span>
-                                                }
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full border ${getStatusColor(log.parkingSpaceStatus, log.isPaid)}`}>
+                                                    {log.isPaid ? 'Đã thanh toán' : getParkingSpaceStatus(log.parkingSpaceStatus)}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div className="flex space-x-2">
