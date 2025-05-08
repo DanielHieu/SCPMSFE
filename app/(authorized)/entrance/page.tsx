@@ -117,12 +117,16 @@ export default function EntrancePage() {
                     if (data.contract && new Date(data.contract.endDate) > new Date()) {
                         addNotification("Đã tìm thấy hợp đồng", "success");
 
+                        // Force switch to contract tab and select contract space
                         setSelectedRentalType(RentalType.Contract);
-                        // Find and select the parking space associated with the contract
                         setSelectedSpace(data.contract.parkingSpaceId);
                     }
                 } else {
                     addNotification("Không tìm thấy hợp đồng cho biển số này", "info");
+                    
+                    // If no contract found, set to walk-in mode
+                    setSelectedRentalType(RentalType.Walkin);
+                    setContract(null);
                 }
 
                 // Set verified license plate and mark contract as checked
@@ -438,15 +442,19 @@ export default function EntrancePage() {
                     <div className="flex mb-6">
                         <button
                             className={`flex-1 py-2 px-4 text-center font-medium border-b-2 transition-all duration-200 ${selectedRentalType === RentalType.Walkin ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                            onClick={() => setSelectedRentalType(RentalType.Walkin)}
+                            onClick={() => contract ? null : setSelectedRentalType(RentalType.Walkin)}
+                            disabled={!!contract}
+                            style={{ opacity: contract ? 0.6 : 1 }}
                         >
-                            Vãng lai
+                            Vãng lai {contract && <span className="text-xs">(Locked)</span>}
                         </button>
                         <button
                             className={`flex-1 py-2 px-4 text-center font-medium border-b-2 transition-all duration-200 ${selectedRentalType === RentalType.Contract ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                            onClick={() => setSelectedRentalType(RentalType.Contract)}
+                            onClick={() => contract ? null : setSelectedRentalType(RentalType.Contract)}
+                            disabled={!!contract}
+                            style={{ opacity: contract ? 0.6 : 1 }}
                         >
-                            Hợp đồng
+                            Hợp đồng {contract && <span className="text-xs">(Locked)</span>}
                         </button>
                     </div>
 
@@ -493,16 +501,24 @@ export default function EntrancePage() {
                                                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                                                             {parkingLotFull.parkingSpaces
                                                                 .filter((space: { floorId: number; }) => space.floorId === floor.floorId)
-                                                                .map((space: { parkingSpaceId: number; status: string; parkingSpaceName: string; }) => (
-                                                                    <motion.div
-                                                                        key={space.parkingSpaceId}
-                                                                        whileHover={space.status === ParkingSpaceStatus.Available ? { scale: 1.05 } : {}}
-                                                                        className={getSpaceStyles(space.status, selectedSpace === space.parkingSpaceId)}
-                                                                        onClick={() => space.status === ParkingSpaceStatus.Available && setSelectedSpace(space.parkingSpaceId)}
-                                                                    >
-                                                                        {space.parkingSpaceName}
-                                                                    </motion.div>
-                                                                ))}
+                                                                .map((space: { parkingSpaceId: number; status: string; parkingSpaceName: string; }) => {
+                                                                    // Disable spaces if contract exists and has been verified
+                                                                    const isSelectable = space.status === ParkingSpaceStatus.Available && !contract;
+                                                                    
+                                                                    return (
+                                                                        <motion.div
+                                                                            key={space.parkingSpaceId}
+                                                                            whileHover={isSelectable ? { scale: 1.05 } : {}}
+                                                                            className={getSpaceStyles(space.status, selectedSpace === space.parkingSpaceId)}
+                                                                            onClick={() => isSelectable && setSelectedSpace(space.parkingSpaceId)}
+                                                                        >
+                                                                            {space.parkingSpaceName}
+                                                                            {contract && selectedSpace !== space.parkingSpaceId && 
+                                                                                <div className="absolute inset-0 bg-gray-500 bg-opacity-30 rounded-lg cursor-not-allowed"></div>
+                                                                            }
+                                                                        </motion.div>
+                                                                    );
+                                                                })}
                                                         </div>
                                                     </div>
                                                 ))}

@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
 import { EntrancingCar } from '@/types/EntrancingCar';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon, ArrowLeftIcon, ClockIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ClockIcon, ChartBarIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { TruckIcon } from '@heroicons/react/24/solid';
 
 export default function Dashboard() {
@@ -64,22 +63,6 @@ export default function Dashboard() {
     return carsInParkingLot; // 'all' tab
   }, [carsInParkingLot, activeTab]);
 
-  // Animation variants for staggered children
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
-
   return (
     <div className="container mx-auto p-4">
       {/* Header with time and date */}
@@ -112,59 +95,6 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Quick action cards */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-      >
-        <motion.div variants={item}>
-          <Link href="/entrance" className="block h-full">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm p-6 border border-blue-200 h-full hover:shadow-md transition-all duration-200 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
-                  <ArrowRightIcon className="h-6 w-6 text-blue-600" />
-                </div>
-                <span className="text-xs font-medium py-1 px-2 rounded-full bg-blue-100 text-blue-800">Entrance</span>
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-blue-900">Xe vào bãi</h2>
-              <p className="text-blue-700">Quản lý xe vào bãi đỗ xe</p>
-            </div>
-          </Link>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Link href="/exit" className="block h-full">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm p-6 border border-green-200 h-full hover:shadow-md transition-all duration-200 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-green-100 p-2 rounded-lg group-hover:bg-green-200 transition-colors">
-                  <ArrowLeftIcon className="h-6 w-6 text-green-600" />
-                </div>
-                <span className="text-xs font-medium py-1 px-2 rounded-full bg-green-100 text-green-800">Exit</span>
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-green-900">Xe ra bãi</h2>
-              <p className="text-green-700">Quản lý xe ra bãi đỗ xe</p>
-            </div>
-          </Link>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Link href="/statistics" className="block h-full">
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl shadow-sm p-6 border border-amber-200 h-full hover:shadow-md transition-all duration-200 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-amber-100 p-2 rounded-lg group-hover:bg-amber-200 transition-colors">
-                  <ChartBarIcon className="h-6 w-6 text-amber-600" />
-                </div>
-                <span className="text-xs font-medium py-1 px-2 rounded-full bg-amber-100 text-amber-800">Analytics</span>
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-amber-900">Thống kê</h2>
-              <p className="text-amber-700">Xem báo cáo và thống kê</p>
-            </div>
-          </Link>
-        </motion.div>
-      </motion.div>
-
       {/* Statistics summary */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -186,13 +116,25 @@ export default function Dashboard() {
             <div className="bg-blue-600 h-1 rounded-full" style={{ width: `${stats.percentageOccupied}%` }}></div>
           </div>
           <p className="text-sm text-gray-500 mt-2">{stats.percentageOccupied}% đã sử dụng</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        </div>        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-gray-500 text-sm">Vị trí đã sử dụng</p>
-              <h3 className="text-2xl font-bold text-gray-800">{stats.occupiedSpaces}</h3>
+              <div className="flex items-center">
+                <p className="text-gray-500 text-sm mr-1">Vị trí đã sử dụng</p>
+                <div className="group relative inline-block">
+                  <InformationCircleIcon className="h-4 w-4 text-gray-400 cursor-help" />
+                  <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute bottom-full mb-2 p-3 w-64 bg-gray-800 text-xs text-white rounded-md shadow-lg z-10 transition-all duration-200">
+                    <p className="mb-1 font-medium">Vị trí đã sử dụng bao gồm:</p>
+                    <ul className="list-disc pl-4">
+                      <li>Vị trí đã có xe đỗ</li>
+                      <li>Vị trí đã chọn cho xe vãng lai</li>
+                      <li>Vị trí đã có hợp đồng thuê</li>
+                    </ul>
+                    <div className="absolute left-0 right-0 -bottom-1 mx-auto w-2 h-2 bg-gray-800 transform rotate-45"></div>
+                  </div>
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mt-1">{stats.occupiedSpaces}</h3>
             </div>
             <div className="p-2 bg-green-50 rounded-lg">
               <TruckIcon className="h-5 w-5 text-green-600" />
@@ -221,7 +163,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-gray-500 text-sm">Lượt xe trong ngày</p>
+              <p className="text-gray-500 text-sm">Lượt xe vào trong ngày</p>
               <h3 className="text-2xl font-bold text-gray-800">{stats?.visitsToday}</h3>
             </div>
             <div className="p-2 bg-purple-50 rounded-lg">

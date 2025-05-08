@@ -13,6 +13,8 @@ interface EntryExitLog {
     totalAmount: number;
     rentalType: string;
     parkingSpaceName: string;
+    floorName: string;
+    areaName: string;
     isPaid: boolean;
     parkingSpaceStatus: string;
     entranceImage: string;
@@ -63,7 +65,7 @@ export default function StatisticsPage() {
             case 'Occupied':
                 return 'Xe đang đỗ';
             default:
-                return 'Trạng thái không xác định';
+                return '';
         }
     };
 
@@ -173,7 +175,14 @@ export default function StatisticsPage() {
                                                 {log.rentalType == "Walkin" ? "Vãng lai" : "Hợp đồng"}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {log.parkingSpaceName}
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">{log.parkingSpaceName}</span>
+                                                    <span className="text-xs text-gray-400">
+                                                        {log.floorName && log.areaName
+                                                            ? `${log.floorName} • ${log.areaName}`
+                                                            : log.floorName || log.areaName || ''}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 {log.isPaid ?
@@ -181,9 +190,8 @@ export default function StatisticsPage() {
                                                         Đã thanh toán
                                                     </span> :
                                                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${log.parkingSpaceStatus === 'Occupied' ? 'bg-blue-100 text-blue-800' :
-                                                        log.parkingSpaceStatus === 'Reserved' ? 'bg-yellow-100 text-yellow-800' :
-                                                            log.parkingSpaceStatus === 'Unavailable' ? 'bg-red-100 text-red-800' :
-                                                                'bg-gray-100 text-gray-800'
+                                                        log.parkingSpaceStatus === 'Pending' ? 'bg-green-100 text-green-800' :
+                                                            'bg-gray-100 text-gray-800'
                                                         }`}>
                                                         {getParkingSpaceStatus(log.parkingSpaceStatus)}
                                                     </span>

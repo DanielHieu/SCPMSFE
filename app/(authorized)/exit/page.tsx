@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParkingLotPrice } from '@/lib/hook/useParkingLotPrice';
 import { Contract } from '@/types/Contract';
-import { ParkingSpace } from '@/types/ParkingLot';
 import { toRentalTypeDisplay } from '@/lib/utils/displayUltil';
 import { useNotification } from '@/lib/context/NotificationContext';
 import { motion } from 'framer-motion';
@@ -13,6 +12,9 @@ interface ParkingRecord {
     id: string;
     licensePlate: string;
     parkingSpaceId: string;
+    parkingSpaceName: string;
+    floorName: string;
+    areaName: string;
     checkInTime: Date;
     checkOutTime: Date;
     rentalType: string;
@@ -20,7 +22,6 @@ interface ParkingRecord {
     fee: number;
     calculationNotes: string;
     contract: Contract | null;
-    parkingSpace: ParkingSpace | null;
     entranceImage?: string;
 }
 
@@ -406,7 +407,11 @@ export default function ExitPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Vị trí đỗ</p>
-                                        <p className="text-gray-900">{parkingRecord.parkingSpace?.parkingSpaceName || 'N/A'}</p>
+                                        <div className="text-gray-900">
+                                            <p>Khu vực: {parkingRecord?.areaName || 'N/A'}</p>
+                                            <p>Tầng: {parkingRecord?.floorName || 'N/A'}</p>
+                                            <p>Vị trí: {parkingRecord?.parkingSpaceName || 'N/A'}</p>
+                                        </div>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Loại hình thuê</p>
@@ -424,28 +429,45 @@ export default function ExitPage() {
 
                                 {/* Right Side - Fee and Contract */}
                                 <div className="space-y-4">
-                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                        <p className="text-sm text-amber-700 font-medium mb-1">Tổng số tiền</p>
+                                    {/* Fee Summary Box */}
+                                    <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-lg p-5 shadow-sm">
+                                        <p className="text-sm text-amber-700 font-medium mb-2">Tổng số tiền</p>
                                         <p className="text-3xl font-bold text-amber-800">{parkingRecord.fee.toLocaleString()} VNĐ</p>
                                         {parkingRecord.calculationNotes && (
-                                            <p className="text-xs text-amber-600 mt-1 italic">({parkingRecord.calculationNotes})</p>
+                                            <div className="mt-3 bg-white bg-opacity-50 rounded-md p-3">
+                                                <p className="text-xs text-amber-700 italic whitespace-pre-line">
+                                                    {parkingRecord.calculationNotes}
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
 
+                                    {/* Contract Information */}
                                     {parkingRecord.contract && (
-                                        <div className="border border-gray-200 rounded-lg p-4">
-                                            <h3 className="text-md font-semibold mb-2 text-gray-700">Thông tin hợp đồng</h3>
-                                            <p className="text-sm text-gray-600">
-                                                <span className="font-medium">Khách hàng:</span> {parkingRecord.contract.car?.customerName}
-                                            </p>
-                                            <p className="text-sm text-gray-600">
-                                                <span className="font-medium">Ngày hết hạn:</span> {formatTime(parkingRecord.contract.endDate)}
-                                            </p>
+                                        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
+                                            <h3 className="text-md font-semibold mb-3 text-gray-700 flex items-center">
+                                                <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                                Thông tin hợp đồng
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <p className="text-sm text-gray-600">
+                                                    <span className="font-medium">Khách hàng:</span>
+                                                </p>
+                                                <p className="text-sm text-gray-800">{parkingRecord.contract.car?.customerName}</p>
+
+                                                <p className="text-sm text-gray-600">
+                                                    <span className="font-medium">Ngày hết hạn:</span>
+                                                </p>
+                                                <p className="text-sm text-gray-800">{formatTime(parkingRecord.contract.endDate)}</p>
+                                            </div>
                                         </div>
                                     )}
 
+                                    {/* Payment Button */}
                                     <button
-                                        className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                                        className={`w-full py-3.5 px-4 rounded-lg text-white font-medium transition-all duration-200 flex items-center justify-center shadow-md ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 hover:shadow-lg'}`}
                                         onClick={() => handlePayment(parkingRecord.id)}
                                         disabled={isLoading}
                                     >
