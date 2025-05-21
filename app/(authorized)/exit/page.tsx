@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParkingLotPrice } from '@/lib/hook/useParkingLotPrice';
 import { Contract } from '@/types/Contract';
-import { ParkingSpace } from '@/types/ParkingLot';
 import { toRentalTypeDisplay } from '@/lib/utils/displayUltil';
 import { useNotification } from '@/lib/context/NotificationContext';
 import { motion } from 'framer-motion';
@@ -13,6 +12,9 @@ interface ParkingRecord {
     id: string;
     licensePlate: string;
     parkingSpaceId: string;
+    parkingSpaceName: string;
+    floorName: string;
+    areaName: string;
     checkInTime: Date;
     checkOutTime: Date;
     rentalType: string;
@@ -20,7 +22,6 @@ interface ParkingRecord {
     fee: number;
     calculationNotes: string;
     contract: Contract | null;
-    parkingSpace: ParkingSpace | null;
     entranceImage?: string;
 }
 
@@ -406,7 +407,11 @@ export default function ExitPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Vị trí đỗ</p>
-                                        <p className="text-gray-900">{parkingRecord.parkingSpace?.parkingSpaceName || 'N/A'}</p>
+                                        <div className="text-gray-900">
+                                            <p>Khu vực: {parkingRecord?.areaName || 'N/A'}</p>
+                                            <p>Tầng: {parkingRecord?.floorName || 'N/A'}</p>
+                                            <p>Vị trí: {parkingRecord?.parkingSpaceName || 'N/A'}</p>
+                                        </div>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Loại hình thuê</p>
@@ -451,7 +456,7 @@ export default function ExitPage() {
                                                     <span className="font-medium">Khách hàng:</span>
                                                 </p>
                                                 <p className="text-sm text-gray-800">{parkingRecord.contract.car?.customerName}</p>
-                                                
+
                                                 <p className="text-sm text-gray-600">
                                                     <span className="font-medium">Ngày hết hạn:</span>
                                                 </p>
